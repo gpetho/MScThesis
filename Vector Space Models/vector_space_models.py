@@ -138,7 +138,7 @@ class Vocabulary:
         if method == 'lm':
             return model(token)[0].lemma_
         else:
-            lemmas = hu_morph.stem(token)
+            lemmas = model.stem(token)
             if len(lemmas) == 0:
                 return token
             else:
@@ -186,7 +186,7 @@ class Vocabulary:
             if lemmatize_method == 'lm':
                 new_lemmas = [t.lemma_ for t in language_model(' '.join(new_alpha))]
             elif lemmatize_method == 'emmorph':
-                new_lemmas = [self.to_lemma(t,method='emmorph') for t in new_alpha]
+                new_lemmas = [self.to_lemma(t,method='emmorph',model=hu_lemmatizer) for t in new_alpha]
 
             if len(new_alpha) == len(new_lemmas):
                 for i in range(len(new_lemmas)):
@@ -342,19 +342,23 @@ class VectorSpaceModel:
             return np.dot(normalize_matrix(self.U[w_index[0]]),normalize_matrix(self.U[w_index[1]]))
         elif method == 'U-V':
             return np.dot(normalize_matrix(self.U[w_index[0]]),normalize_matrix(self.V[w_index[1]]))
+        elif method == 'V-V':
+            return np.dot(normalize_matrix(self.V[w_index[0]]),normalize_matrix(self.V[w_index[1]]))
         elif method == 'U+V':
             return np.dot( normalize_matrix(self.U[w_index[0]]+self.V[w_index[0]]) ,
                            normalize_matrix(self.U[w_index[1]]+self.V[w_index[1]]) )
 
     def compare_vector_to_matrix(self,w,method='U-U',n=0):
         if w not in self.vocab.v_ids or not self.filtered_vocab[self.vocab.v_ids[w]]:
-            sys.exit(w, "is not in the filtered dictionary")
+            sys.exit(w+" is not in the filtered dictionary")
         else:
             word_index = self.vocab.v_ids[w]
         if method == 'U-U':
             filtered_similarities = np.matmul(normalize_matrix(self.U[word_index]),normalize_matrix(self.U[self.filtered_vocab]).T)
         elif method == 'U-V':
             filtered_similarities = np.matmul(normalize_matrix(self.U[word_index]),normalize_matrix(self.V[self.filtered_vocab]).T)
+        elif method == 'V-V':
+            filtered_similarities = np.matmul(normalize_matrix(self.V[word_index]),normalize_matrix(self.V[self.filtered_vocab]).T)
         elif method == 'U+V':
             added_word_vector = normalize_matrix(self.U[word_index]+self.V[word_index])
             added_vsm_matrices = normalize_matrix(self.U[self.filtered_vocab]+self.V[self.filtered_vocab])
@@ -368,7 +372,7 @@ class VectorSpaceModel:
         similarities = {}
         ranks_w1 = {}
         ranks_w2 = {}
-        for method in ['U-U','U-V','U+V']:
+        for method in ['U-U','V-V','U-V','U+V']:
             similarities[method] = self.compare_vectors(w1,w2,method)
             sorted_similarities = self.compare_vector_to_matrix(w1,method)
             for i in range(len(sorted_similarities)):
@@ -383,7 +387,7 @@ class VectorSpaceModel:
         if return_method:
             return [similarities[return_method],ranks_w1[return_method],ranks_w2[return_method]]
         else:
-            for m in ['U-U','U-V','U+V']:
+            for m in ['U-U','V-V','U-V','U+V']:
                 print('%s: similarity %1.5f, rank of %s for %s %d, rank of %s for %s %d'%(m,similarities[m],w2,w1,ranks_w1[m],w1,w2,ranks_w2[m]))
     
     def most_similar(self,w,n=10):

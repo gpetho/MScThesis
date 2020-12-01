@@ -134,7 +134,7 @@ class VectorSpaceModelWithSubwords(VectorSpaceModel):
 
     def downweight_subwords(self, subword_id_list, a=0.001):
         if a <= 0 or a >= 1:
-            sys.exit('Invalid weighting constant', a)
+            sys.exit('Invalid weighting constant '+ a)
         return [a / (a + self.subword_type_token_counts[swid][1] / self.vocabulary_token_count) for swid in subword_id_list]
 
     def sum_subwords(self,word,downsample = None):
@@ -264,6 +264,13 @@ class VectorSpaceModelWithSubwords(VectorSpaceModel):
                 sys.exit(f"Cannot compare since {w2} is not in the filtered vocabulary")
             else:
                 return np.dot(normalize_matrix(u_vector[0]),normalize_matrix(v_vector[1]))
+        elif method == 'V-V':
+            if np.sum(v_vector[0]) == 0:
+                sys.exit(f"Cannot compare since {w1} is not in the filtered vocabulary")
+            if np.sum(v_vector[1]) == 0:
+                sys.exit(f"Cannot compare since {w2} is not in the filtered vocabulary")
+            else:
+                return np.dot(normalize_matrix(v_vector[0]),normalize_matrix(v_vector[1]))
         elif method == 'U+V':
             return np.dot( normalize_matrix(u_vector[0]+v_vector[0]) ,
                            normalize_matrix(u_vector[1]+v_vector[1]) )
@@ -272,14 +279,14 @@ class VectorSpaceModelWithSubwords(VectorSpaceModel):
         if use_subwords:
             u_vector = self.sum_subwords(w)
             if len(u_vector) == 0:
-                sys.exit(w, "is not in the filtered vocabulary and does not have any listed subwords")
+                sys.exit(w+ " is not in the filtered vocabulary and does not have any listed subwords")
             if w in self.vocab.v_ids and self.filtered_vocab[self.vocab.v_ids[w]]:
                 v_vector = self.V[self.full_to_filtered_id[self.vocab.v_ids[w]]]
             else:
                 v_vector = np.zeros(self.vsm_dim,dtype=float)
         else:
             if w not in self.vocab.v_ids or not self.filtered_vocab[self.vocab.v_ids[w]]:
-                sys.exit(w, "is not in the filtered dictionary")
+                sys.exit(w+ " is not in the filtered dictionary")
             else:
                 u_vector = self.U[self.full_to_filtered_id[self.vocab.v_ids[w]]]
                 v_vector = self.V[self.full_to_filtered_id[self.vocab.v_ids[w]]]
@@ -288,6 +295,8 @@ class VectorSpaceModelWithSubwords(VectorSpaceModel):
             filtered_similarities = np.matmul(normalize_matrix(u_vector),normalize_matrix(self.summed_U[:len(self.filtered_indices)]).T)
         elif method == 'U-V':
             filtered_similarities = np.matmul(normalize_matrix(u_vector),normalize_matrix(self.V).T)
+        elif method == 'V-V':
+            filtered_similarities = np.matmul(normalize_matrix(v_vector),normalize_matrix(self.V).T)
         elif method == 'U+V':
             added_word_vector = normalize_matrix(u_vector+v_vector)
             added_vsm_matrices = normalize_matrix(self.summed_U[:len(self.filtered_indices)]+self.V)
@@ -300,7 +309,7 @@ class VectorSpaceModelWithSubwords(VectorSpaceModel):
     def compare_ranks(self,w1,w2,return_method=None):
         for w in [w1,w2]:
             if w not in self.vocab.v_ids or not self.filtered_vocab[self.vocab.v_ids[w]]:
-                sys.exit(w, 'is not in the filtered dictionary, cannot rank similarity')
+                sys.exit(w+ ' is not in the filtered dictionary, cannot rank similarity')
         return super().compare_ranks(w1,w2,return_method)
     
     def train(self,corpus,epochs = 1, num_neg_samples = 10, lr = 0.1, lr_decay = True, l2_lambda = 0, normalize_vectors = '', shuffled = 0, epoch_callback=None):
@@ -630,7 +639,7 @@ class BilingualVectorSpaceModelWithSubwords(BilingualVectorSpaceModel):
 
     def downweight_subwords(self, language, subword_id_list, a=0.001):
         if a <= 0 or a >= 1:
-            sys.exit('Invalid weighting constant', a)
+            sys.exit('Invalid weighting constant '+ a)
         return [a / (a + self.subword_type_token_counts[language][swid][1] / self.vocabulary_token_count[language]) for swid in subword_id_list]
 
     def sum_subwords(self,language,word,downsample = None):
@@ -936,7 +945,7 @@ class BilingualVectorSpaceModelWithSubwords(BilingualVectorSpaceModel):
                   
         u_vector = self.sum_subwords(lang_ids[0],w)
         if len(u_vector) == 0:
-            sys.exit(w, "is not in the filtered vocabulary and does not have any listed subwords")
+            sys.exit(w+ " is not in the filtered vocabulary and does not have any listed subwords")
         
         if w in self.vocab[lang_ids[0]].v_ids and self.filtered_vocab[lang_ids[0]][self.vocab[lang_ids[0]].v_ids[w]]:
             v_vector = V[lang_ids[0]][self.full_to_filtered_id[lang_ids[0]][self.vocab[lang_ids[0]].v_ids[w]]]
@@ -951,6 +960,10 @@ class BilingualVectorSpaceModelWithSubwords(BilingualVectorSpaceModel):
             if np.sum(v_vector) == 0:
                 sys.exit(f"Cannot compare since {w} is not in the filtered vocabulary")
             filtered_similarities = np.matmul(normalize_matrix(v_vector),normalize_matrix(self.summed_U[lang_ids[1]][:len(self.filtered_indices[lang_ids[0]])]).T)
+        elif method == 'V-V':
+            if np.sum(v_vector) == 0:
+                sys.exit(f"Cannot compare since {w} is not in the filtered vocabulary")
+            filtered_similarities = np.matmul(normalize_matrix(v_vector),normalize_matrix(V[lang_ids[1]]).T)
         elif method == 'U+V':
             added_word_vector = normalize_matrix(u_vector+v_vector)
             added_vsm_matrices = normalize_matrix(self.summed_U[lang_ids[1]][:len(self.filtered_indices[lang_ids[1]])]+V[lang_ids[1]])
@@ -971,7 +984,7 @@ class BilingualVectorSpaceModelWithSubwords(BilingualVectorSpaceModel):
 
         for w in [w1,w2]:
             if w not in self.vocab[lang_id].v_ids or not self.filtered_vocab[lang_id][self.vocab[lang_id].v_ids[w]]:
-                sys.exit(w, 'is not in the filtered dictionary, cannot rank similarity')
+                sys.exit(w+ ' is not in the filtered dictionary, cannot rank similarity')
         return super().compare_ranks(w1,w2,lang,return_results,methods)
 
     def bilingual_compare_ranks(self,w1,w2,lang1='.',lang2='.',return_results=False,methods=None):
@@ -984,7 +997,7 @@ class BilingualVectorSpaceModelWithSubwords(BilingualVectorSpaceModel):
         
         for lang_id, w in [[lang_ids[0],w1],[lang_ids[1],w2]]:
             if w not in self.vocab[lang_id].v_ids or not self.filtered_vocab[lang_id][self.vocab[lang_id].v_ids[w]]:
-                sys.exit(w, 'is not in the filtered dictionary, cannot rank similarity')
+                sys.exit(w+ ' is not in the filtered dictionary, cannot rank similarity')
         return super().bilingual_compare_ranks(w1,w2,lang1,lang2,return_results,methods)
                   
     def train(self,corpus,target_center_method = 'linear',window_size = 20, dynamic_window = False, epochs = 1, lr_decay = True, num_neg_samples = 5, lr = 0.05, l2_lambda = 0, normalize_vectors = '', shuffled = 0, epoch_callback=None, report_state=500):

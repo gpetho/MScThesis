@@ -542,7 +542,7 @@ class VSM_Corpus:
                 if self.vsm.vocab.lower:
                     tokens_filtered = [t.lower() for t in tokens_filtered]
                 if self.vsm.vocab.lemmatize:
-                    tokens_filtered = [self.vsm.vocab.form_to_lemma[t] for t in tokens_filtered if self.vsm.filtered_vocab[self.vsm.vocab.form_to_lemma[t]]]
+                    tokens_filtered = [self.vsm.vocab.form_to_lemma[t] for t in tokens_filtered if t in self.vsm.vocab.form_to_lemma and self.vsm.filtered_vocab[self.vsm.vocab.form_to_lemma[t]]]
                 else:
                     tokens_filtered = [self.vsm.vocab.v_ids[t] for t in tokens_filtered if self.vsm.filtered_vocab[self.vsm.vocab.v_ids[t]]]
                 
@@ -1260,7 +1260,7 @@ class BilingualVSM_Corpus:
                     filtered_tokens = [list(),list()]
                     for i, l in ((0,self.vsm.vocab[0].lang),(1,self.vsm.vocab[1].lang)):
                         if self.vsm.vocab[i].lemmatize:
-                            filtered_tokens[i] = [self.vsm.vocab[i].form_to_lemma[t] for t in bisegment.get_tokens(l,lower=self.vsm.vocab[i].lower) if t in self.vsm.vocab[i].form_to_lemma[t] and self.vsm.filtered_vocab[i][self.vsm.vocab[i].form_to_lemma[t]]]
+                            filtered_tokens[i] = [self.vsm.vocab[i].form_to_lemma[t] for t in bisegment.get_tokens(l,lower=self.vsm.vocab[i].lower) if t in self.vsm.vocab[i].form_to_lemma and self.vsm.filtered_vocab[i][self.vsm.vocab[i].form_to_lemma[t]]]
                         else:
                             filtered_tokens[i] = [self.vsm.vocab[i].v_ids[t] for t in bisegment.get_tokens(l,lower=self.vsm.vocab[i].lower) if t in self.vsm.vocab[i].v_ids and self.vsm.filtered_vocab[i][self.vsm.vocab[i].v_ids[t]]]
 #                        filtered_tokens[i] = [self.vsm.vocab[i].v_ids[t] for t in bisegment.get_tokens(l,lower=self.vsm.vocab[i].lower) if self.vsm.filtered_vocab[i][self.vsm.vocab[i].v_ids[t]]]

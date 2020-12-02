@@ -17,7 +17,6 @@ These cover the following steps of the process:
 * implementation of a version of a fastText-style variant of the SGNS algorithm that includes purely n-gram-based subword information
 * implementation of an alternative variant of the previous algorithm that uses subword information in a smarter way, based on Hafer & Weiss (1974)-style morpheme boundary heuristics
 * implementation of a bilingual version of the SGNS algorithm that is trained bidirectionally on bisegments
-* augmenting the classic alignment algorithm with bilingual word vectors
-* accuracy benchmarks to evaluate the alignment algorithms
+* benchmarks to compare different vector space models with regard to their ability to differentiate between segments that should and ones that should not be linked in course of the alignment process
 
 The code was written in Python and is largely undocumented and uncommented. Some parts, notably statistical calculations and benchmarks, are presented as iPython notebooks.

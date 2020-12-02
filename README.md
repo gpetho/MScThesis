@@ -1,5 +1,5 @@
 # MScThesis
-Program code for my CS master's thesis on using bilingual lexical vector space models for bitext alignment
+Program code for my CS master's thesis on using cross-lingual lexical vector space models for bitext alignment
 
 The repository contains most of the code that was used in writing the Case Study chapter of my MSc thesis on using vector space models for the alignment of parallel texts, so-called bitexts.
 

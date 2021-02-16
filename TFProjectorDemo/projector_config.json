@@ -6,8 +6,8 @@
         1000,
         50
       ],
-      "tensorPath": "https://github.com/gpetho/MScThesis/upload/main/TFProjectorDemo/all_vecs.tsv",
-      "metadataPath": "https://github.com/gpetho/MScThesis/upload/main/TFProjectorDemo/metadata.tsv"
+      "tensorPath": "https://raw.githubusercontent.com/gpetho/MScThesis/upload/main/TFProjectorDemo/all_vecs.tsv",
+      "metadataPath": "https://raw.githubusercontent.com/gpetho/MScThesis/upload/main/TFProjectorDemo/metadata.tsv"
     }
   ]
 }

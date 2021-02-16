@@ -1,0 +1,13 @@
+{
+  "embeddings": [
+    {
+      "tensorName": "My tensor",
+      "tensorShape": [
+        1000,
+        50
+      ],
+      "tensorPath": "https://github.com/gpetho/MScThesis/upload/main/TFProjectorDemo/all_vecs.tsv",
+      "metadataPath": "https://github.com/gpetho/MScThesis/upload/main/TFProjectorDemo/metadata.tsv"
+    }
+  ]
+}
